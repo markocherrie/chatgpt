@@ -49,9 +49,41 @@ out<-ggplot(world) +
   theme(legend.position = "none", 
         axis.text.x = element_blank(),
         axis.ticks.x = element_blank())+
-  scale_fill_manual(values = c("#D3D3D3", "#8ec045"))
+  scale_fill_manual(values = c("#D3D3D3", "#8ec045"))+
+  ggtitle(gsub("(\\_|Group|\\.)", " ",i))
 
-ggsave( paste0("output/", gsub("\\_", "",i),".png"), out, dpi = 500)
+ggsave( paste0("output/", gsub("\\_", " ",i),".png"), out, dpi = 500)
 }
+
+
+###
+# Load necessary libraries
+library(ggplot2)
+library(sp)
+library(crosstalk)
+
+# Load data
+data(nc)
+
+# Create a ggplot object
+p <- ggplot(nc, aes(fill = SID74, map_id = NAME)) + 
+  geom_map(map = nc_map) +
+  expand_limits(x = nc_map$range$longitude, y = nc_map$range$latitude) +
+  scale_fill_gradient(low = "white", high = "red", na.value = "grey50",
+                      guide = "colorbar", name = "SID74") +
+  labs(title = "North Carolina Counties, 1974")
+
+# Create a SharedData object
+sd <- SharedData$new(nc)
+
+# Create a filter_select widget
+fs <- filter_select("county", "Select county", sd, ~NAME, multiple = FALSE)
+
+# Create a bscols layout with the ggplot and filter_select widget
+bscols(p, fs)
+
+
+
+
 
 
